@@ -14,87 +14,6 @@ Consider isothermal two-phase gravity segregation of water and gas in a 10 m cub
 – z ∈ [7.5, 10] m: x ∈ [5, 10] m, y ∈ [0, 10] m.
 Gravity acts downward along −z (9.81 m s⁻²). There are no wells and no open boundaries. The initial pressure is 5 MPa, uniform (not hydrostatic). The temperature is isothermal at 300 K.
 
-The two horizontal permeabilities are k_x = k_y = 1×10^{-15} m² and the vertical permeability is k_z = 1×10^{-16} m². The reference porosity is 0.20 at 5 MPa, with pore-volume compressibility 1×10^-9 Pa^{-1}.
-
-The two components are immiscible. Surface densities are 1022 kg m⁻³ (water) and 0.9907 kg m⁻³ (gas); molar masses are 0.018 kg mol⁻¹ (water) and 0.016 kg mol⁻¹ (gas). Phase behaviour is given by tabulated dead-oil / black-oil formation-volume-factor and viscosity versus pressure.
-Water, single reference point: P_ref = 3.06000001×10^7 Pa, B_w = 1.03, C_p = 4.1×10^{-10} Pa^{-1}, μ_w = 3.0×10^{-4} Pa·s.
-Gas formation-volume factor B_g (m³/sm³) and viscosity μ_g (Pa·s) versus pressure P (Pa):
-P = (3000000, 6000000, 9000000, 12000000, 15000000, 18000000, 21000000, 24000000, 27000000, 29500000, 31000000, 33000000, 53000000)
-B_g = (0.04234, 0.02046, 0.01328, 0.00977, 0.00773, 0.006426, 0.005541, 0.004919, 0.004471, 0.004194, 0.004031, 0.00391, 0.003868)
-μ_g = (0.00005344, 0.0000542, 0.00005526, 0.0000566, 0.00005818, 0.00005994, 0.00006181, 0.0000637, 0.00006559, 0.00006714, 0.00006806, 0.00006832, 0.00006935).
-
-Drainage relative permeabilities are tabulated as follows.
-Water, k_rw(S_w):
-S_w = (0.22000, 0.25000, 0.30000, 0.35000, 0.40000, 0.45000, 0.50000, 0.55000, 0.60000, 0.65000, 0.66000, 0.68000, 0.72000, 0.82000, 0.91000, 1.00000)
-k_rw = (0.00000, 0.00100, 0.00300, 0.01000, 0.01800, 0.03500, 0.04000, 0.05700, 0.08800, 0.14500, 0.16000, 0.19000, 0.26300, 0.45500, 0.69200, 1.)
-Gas, k_rg(S_g):
-S_g = (0.000, 0.010, 0.030, 0.050, 0.100, 0.150, 0.200, 0.250, 0.300, 0.350, 0.400, 0.450, 0.500, 0.550, 0.600, 0.650, 0.700, 0.750, 0.780)
-k_rg = (0.00000, 0.00200, 0.00700, 0.01000, 0.02000, 0.04000, 0.07500, 0.12700, 0.18000, 0.24000, 0.31000, 0.37300, 0.46000, 0.55000, 0.64000, 0.73000, 0.82500, 0.92000, 1.00000).
-
-Imbibition relative permeabilities, used together with the drainage tables under history-dependent hysteresis (scanning between the two curves), are:
-Water, k_rw(S_w):
-S_w = (0.22000, 0.25000, 0.30000, 0.35000, 0.40000, 0.45000, 0.50000, 0.55000, 0.60000, 0.65000, 0.66000, 0.70000)
-k_rw = (0, 0.0156, 0.0680, 0.1409, 0.2296, 0.3317, 0.4455, 0.5700, 0.7044, 0.8479, 0.8776, 0.9382)
-Gas, k_rg(S_g):
-S_g = (0.300, 0.350, 0.400, 0.450, 0.500, 0.550, 0.600, 0.650, 0.700, 0.750, 0.780)
-k_rg = (0.0000, 0.03361965, 0.09509072, 0.17469281, 0.26895718, 0.37587908, 0.49410588, 0.62264458, 0.76072577, 0.90773047, 1.).
-
-Both drainage and imbibition relative-permeability tables are used, with history-dependent hysteresis (scanning between the two curves).
-
-Initial overall mole fractions are specified in two overlapping boxes: a bottom layer z ∈ [0, 1.01] m and the remainder z ∈ [0.80, 10] m, with the bottom-layer specification overwriting the overlap z ∈ [0.80, 1.01] m. The stack is inverted: the bottom layer is the gas-rich side (water mole fraction 0.10, gas 0.90); the remainder is water 0.99, gas 0.01.
-
-Time is advanced with a maximum step of 4×10^6 s after a short increasing start-up, to an end time of 4×10^8 s.
-
-Determine the gas saturation (gas phase volume fraction) at the cell centred at (2.5, 2.5, 0.417) m at t = 8×10^7 s, while the bottom-layer gas cushion is still collapsing. Report the value as a saturation in [0, 1], non-negative. Answers within 1.0% relative are accepted.
-
-
-### Ground Truth
-
-0.5448722276315476
-
-
-### No-Tool Answer
-
-The predicted gas saturation is
-
-\[
-\boxed{S_g(2.5,2.5,0.417;\ 8\times10^7\ \mathrm{s}) \approx 0.56}
-\]
-
-This is an estimate based on gravity-driven counter-current flux with hysteretic imbibition in the collapsing gas-rich bottom cell.
-
-
-### Judge
-
-
-- Verdict: INCORRECT
-
-- No-tool estimate: 0.56
-
-- No-tool conclusion: None
-
-- Relative error percent: 2.776388958969311
-
-- Reasoning sound: False
-
-- Decisive comparison: The answer commits to Sg ≈ 0.56 at the west-bottom cell, about 2.8% above the true 0.54487 and outside the 1.0% relative window (about 0.5394–0.5503).
-
-- Key discrepancy: It ballparks a still-collapsing hysteretic cushion near 0.56 instead of the simulated anisotropic gravity-segregation value 0.545.
-
-
----
-
-## Q02
-
-### Question
-
-Consider isothermal two-phase gravity segregation of water and gas in a 10 m cube. The cube is meshed with hexahedra of Δx = Δy = 1 m and Δz = 2.5/3 m (cell centres at 0.5, 1.5, …, 9.5 m in x and y; 0.417, 1.25, 2.083, 3.75, …, 9.583 m in z). Flow is confined to a 3-D staircase of permeable rock; the complementary blocks are impermeable (empty of pore fluid). Permeable occupancy is:
-– z ∈ [0, 2.5] m: y ∈ [0, 5] m, x ∈ [0, 10] m;
-– z ∈ [2.5, 5] m: x ∈ [0, 5] m, y ∈ [0, 10] m;
-– z ∈ [5, 7.5] m: y ∈ [5, 10] m, x ∈ [0, 10] m;
-– z ∈ [7.5, 10] m: x ∈ [5, 10] m, y ∈ [0, 10] m.
-Gravity acts downward along −z (9.81 m s⁻²). There are no wells and no open boundaries. The initial pressure is 5 MPa, uniform (not hydrostatic). The temperature is isothermal at 300 K.
-
 The permeable rock is isotropic with permeability 1×10^{-15} m². The reference porosity is 0.20 at 5 MPa, with pore-volume compressibility 1×10^-9 Pa^{-1}.
 
 The two components are immiscible. Surface densities are 1022 kg m⁻³ (water) and 0.9907 kg m⁻³ (gas); molar masses are 0.018 kg mol⁻¹ (water) and 0.016 kg mol⁻¹ (gas). Phase behaviour is given by tabulated dead-oil / black-oil formation-volume-factor and viscosity versus pressure.
@@ -165,6 +84,89 @@ At late time, the upper cell layer is gas-ponded near \(S_g=0.78\), while the tw
 - Decisive comparison: The answer commits to a block-mean gas saturation of 0.46, while the simulation truth is 0.33816; the relative error is about 36%, far beyond the 1% relative tolerance.
 
 - Key discrepancy: It treats the 2.5 m stair as one fully ponded cell at Sg=0.78 over two residual layers at Sg=0.30, but the ceiling pond does not fill a whole layer to residual-gas-free saturation, so the true block mean is 0.338 rather than 0.46.
+
+
+---
+
+
+## Q02
+
+
+### Question
+
+Consider isothermal two-phase gravity segregation of water and gas in a 10 m cube. The cube is meshed with hexahedra of Δx = Δy = 1 m and Δz = 2.5/3 m (cell centres at 0.5, 1.5, …, 9.5 m in x and y; 0.417, 1.25, 2.083, 3.75, …, 9.583 m in z). Flow is confined to a 3-D staircase of permeable rock; the complementary blocks are impermeable (empty of pore fluid). Permeable occupancy is:
+– z ∈ [0, 2.5] m: y ∈ [0, 5] m, x ∈ [0, 10] m;
+– z ∈ [2.5, 5] m: x ∈ [0, 5] m, y ∈ [0, 10] m;
+– z ∈ [5, 7.5] m: y ∈ [5, 10] m, x ∈ [0, 10] m;
+– z ∈ [7.5, 10] m: x ∈ [5, 10] m, y ∈ [0, 10] m.
+Gravity acts downward along −z (9.81 m s⁻²). There are no wells and no open boundaries. The initial pressure is 5 MPa, uniform (not hydrostatic). The temperature is isothermal at 300 K.
+
+The two horizontal permeabilities are k_x = k_y = 1×10^{-15} m² and the vertical permeability is k_z = 1×10^{-16} m². The reference porosity is 0.20 at 5 MPa, with pore-volume compressibility 1×10^-9 Pa^{-1}.
+
+The two components are immiscible. Surface densities are 1022 kg m⁻³ (water) and 0.9907 kg m⁻³ (gas); molar masses are 0.018 kg mol⁻¹ (water) and 0.016 kg mol⁻¹ (gas). Phase behaviour is given by tabulated dead-oil / black-oil formation-volume-factor and viscosity versus pressure.
+Water, single reference point: P_ref = 3.06000001×10^7 Pa, B_w = 1.03, C_p = 4.1×10^{-10} Pa^{-1}, μ_w = 3.0×10^{-4} Pa·s.
+Gas formation-volume factor B_g (m³/sm³) and viscosity μ_g (Pa·s) versus pressure P (Pa):
+P = (3000000, 6000000, 9000000, 12000000, 15000000, 18000000, 21000000, 24000000, 27000000, 29500000, 31000000, 33000000, 53000000)
+B_g = (0.04234, 0.02046, 0.01328, 0.00977, 0.00773, 0.006426, 0.005541, 0.004919, 0.004471, 0.004194, 0.004031, 0.00391, 0.003868)
+μ_g = (0.00005344, 0.0000542, 0.00005526, 0.0000566, 0.00005818, 0.00005994, 0.00006181, 0.0000637, 0.00006559, 0.00006714, 0.00006806, 0.00006832, 0.00006935).
+
+Drainage relative permeabilities are tabulated as follows.
+Water, k_rw(S_w):
+S_w = (0.22000, 0.25000, 0.30000, 0.35000, 0.40000, 0.45000, 0.50000, 0.55000, 0.60000, 0.65000, 0.66000, 0.68000, 0.72000, 0.82000, 0.91000, 1.00000)
+k_rw = (0.00000, 0.00100, 0.00300, 0.01000, 0.01800, 0.03500, 0.04000, 0.05700, 0.08800, 0.14500, 0.16000, 0.19000, 0.26300, 0.45500, 0.69200, 1.)
+Gas, k_rg(S_g):
+S_g = (0.000, 0.010, 0.030, 0.050, 0.100, 0.150, 0.200, 0.250, 0.300, 0.350, 0.400, 0.450, 0.500, 0.550, 0.600, 0.650, 0.700, 0.750, 0.780)
+k_rg = (0.00000, 0.00200, 0.00700, 0.01000, 0.02000, 0.04000, 0.07500, 0.12700, 0.18000, 0.24000, 0.31000, 0.37300, 0.46000, 0.55000, 0.64000, 0.73000, 0.82500, 0.92000, 1.00000).
+
+Imbibition relative permeabilities, used together with the drainage tables under history-dependent hysteresis (scanning between the two curves), are:
+Water, k_rw(S_w):
+S_w = (0.22000, 0.25000, 0.30000, 0.35000, 0.40000, 0.45000, 0.50000, 0.55000, 0.60000, 0.65000, 0.66000, 0.70000)
+k_rw = (0, 0.0156, 0.0680, 0.1409, 0.2296, 0.3317, 0.4455, 0.5700, 0.7044, 0.8479, 0.8776, 0.9382)
+Gas, k_rg(S_g):
+S_g = (0.300, 0.350, 0.400, 0.450, 0.500, 0.550, 0.600, 0.650, 0.700, 0.750, 0.780)
+k_rg = (0.0000, 0.03361965, 0.09509072, 0.17469281, 0.26895718, 0.37587908, 0.49410588, 0.62264458, 0.76072577, 0.90773047, 1.).
+
+Both drainage and imbibition relative-permeability tables are used, with history-dependent hysteresis (scanning between the two curves).
+
+Initial overall mole fractions are specified in two overlapping boxes: a bottom layer z ∈ [0, 1.01] m and the remainder z ∈ [0.80, 10] m, with the bottom-layer specification overwriting the overlap z ∈ [0.80, 1.01] m. The stack is inverted: the bottom layer is the gas-rich side (water mole fraction 0.10, gas 0.90); the remainder is water 0.99, gas 0.01.
+
+Time is advanced with a maximum step of 4×10^6 s after a short increasing start-up, to an end time of 4×10^8 s.
+
+Determine the gas saturation (gas phase volume fraction) at the cell centred at (2.5, 2.5, 0.417) m at t = 8×10^7 s, while the bottom-layer gas cushion is still collapsing. Report the value as a saturation in [0, 1], non-negative. Answers within 1.0% relative are accepted.
+
+
+### Ground Truth
+
+0.5448722276315476
+
+
+### No-Tool Answer
+
+The predicted gas saturation is
+
+\[
+\boxed{S_g(2.5,2.5,0.417;\ 8\times10^7\ \mathrm{s}) \approx 0.56}
+\]
+
+This is an estimate based on gravity-driven counter-current flux with hysteretic imbibition in the collapsing gas-rich bottom cell.
+
+
+### Judge
+
+
+- Verdict: INCORRECT
+
+- No-tool estimate: 0.56
+
+- No-tool conclusion: None
+
+- Relative error percent: 2.776388958969311
+
+- Reasoning sound: False
+
+- Decisive comparison: The answer commits to Sg ≈ 0.56 at the west-bottom cell, about 2.8% above the true 0.54487 and outside the 1.0% relative window (about 0.5394–0.5503).
+
+- Key discrepancy: It ballparks a still-collapsing hysteretic cushion near 0.56 instead of the simulated anisotropic gravity-segregation value 0.545.
 
 
 ---

@@ -1,24 +1,9 @@
-# GEOS Sweep Benchmark — Hard Question Generation and No-Tool Evaluation Protocol (v2)
+# GEOS Sweep Benchmark — Hard Question Generation and No-Tool Evaluation Protocol (v3)
 
 ## 0. Purpose
 
 This file is the execution contract for a Cursor CLI controller agent. Execute it.
 Do not summarise or explain it.
-
-For one target GEOS deck, the controller:
-
-1. reads the deck and every file it depends on, and runs it once to check it works;
-2. designs ONE shared parameter sweep and runs it (up to `MAX_SIMULATIONS_PER_PASS` runs,
-   including refinement runs);
-3. builds a results table from the sweep;
-4. writes `QUESTIONS_PER_PASS` hard scientific questions whose correct answers come
-   from that table and from targeted refinement runs (the simulations ARE the ground
-   truth — there is no separate reference solver);
-5. gives each question, alone and in its own fresh isolated session, to a no-tool model;
-6. judges each no-tool answer against the simulation-derived truth;
-7. decides whether the deck produces hard questions; if not, diagnoses the no-tool
-   model's shortcuts, redesigns the sweep, and tries once more;
-8. logs everything locally and to Weights & Biases.
 
 A question is GOOD (accepted) when the no-tool model gets it WRONG.
 
@@ -34,18 +19,18 @@ All counts and limits below are variables. Refer to them by name. Never treat a 
 in this file as fixed. Substitute configured values into prompts before sending them.
 
 ```text
-PROTOCOL_VERSION           = 2
-RUN_TAG                    = v2_run1     # change for every new experiment on the same deck
+PROTOCOL_VERSION           = 3
+RUN_TAG                    = v3_run1     # change for every new experiment on the same deck
 
 D                          = /home/kbhau001/codes/GEOS/geos_sweep_bench
-GEOS_ROOT                  = /home/kbhau001/codes/GEOS
-INPUT_XML                  = /home/kbhau001/codes/GEOS/inputFiles/compositionalMultiphaseFlow/4comp_2ph_cap_1d.xml
+GEOS_ROOT                   = /home/kbhau001/codes/GEOS
+INPUT_XML                  = inputFiles/thermoPoromechanicsFractures/ThermoPoroElastic_conforming_smoke.xml
 
 GEOS_LINUX                 = /home/kbhau001/codes/GEOS/build-conda-geos-release/bin/geosx
 GEOS_MACOS                 = <SET WHEN RUNNING ON MACOS>
 CONDA_ENV                  = geos
 
-AGENT_MODEL                = cursor-grok-4.6-high   # controller, generation, judge, diagnosis, everything except no tool model
+AGENT_MODEL                = grok-4.7-high   # controller, generation, judge, diagnosis, everything except no tool model
 NO_TOOL_MODEL              = gpt-5.6-sol            # no-tool solver ONLY
 
 QUESTIONS_PER_PASS         = 15
@@ -61,9 +46,6 @@ MAX_FAILED_RUN_PERCENT     = 5
 
 NO_TOOL_PARALLEL_JOBS      = 15
 MAX_NO_TOOL_RERUNS         = 1
-
-WANDB_PROJECT              = geos-sweep-bench
-WANDB_ENTITY               = <use the currently configured entity>
 ```
 
 If `INPUT_XML` or the GEOS path for the current OS is still a placeholder, stop and
@@ -81,6 +63,7 @@ report it.
    ```bash
    source "$(conda info --base)/etc/profile.d/conda.sh"
    conda activate geos
+   export PYTHONDONTWRITEBYTECODE=1
    ```
    Never use system Python. Never use `sudo`. Install a missing package only inside
    `geos` (`python -m pip install <pkg>`) and append the package and version to
@@ -102,7 +85,18 @@ report it.
    available, record `null`.
 10. The launch model must equal `AGENT_MODEL`. At startup, read the model reported in
     your own session; if it differs from `AGENT_MODEL`, stop and report.
-11. W&B problems never stop the experiment (Section 16).
+11. **Reuse scripts; one command per stage.** Before writing any script, look in
+    `D/_global/scripts/`. If a suitable script exists, run it. If you must write a new
+    one, make it generic (not tied to one deck or question), save it there, and reuse
+    it on later decks. Each mechanical stage (build + launch sweep, extract table,
+    refinement bisection, freeze + verify, launch no-tool sessions, judge, finish)
+    runs as ONE command, not one tool call per run or per question.
+12. **Keep controller context small.** Never print a whole file, log, trace, CSV, or
+    HDF5 dump. Every command prints at most ~50 lines (use `head`, `tail -n`, `wc`,
+    or a Python summary). When waiting on a long job, wait inside one command
+    (e.g. a loop with `sleep` that exits when the job is done or after a long
+    interval) instead of checking repeatedly with separate tool calls.
+
 
 ---
 
@@ -137,21 +131,20 @@ D/
     │   │   ├── run_sweep.sh
     │   │   ├── extract_table.py
     │   │   ├── pilot/
-    │   │   ├── runs/run_0001/ ... each: input.xml, command.txt, stdout.log, stderr.log, run.json, output/
-    │   │   ├── refine/<Qid>/ref_01/ ...   refinement runs (same layout as runs)
+    │   │   ├── runs/run_0001/ ... each: input.xml, run.json, output/   (stdout.log, stderr.log only if the run failed). Deleted at finish.
+    │   │   ├── refine/<Qid>/ref_01/ ...   refinement runs (same layout as runs; observables.json is kept at finish)
     │   │   ├── sweep_table.csv
     │   │   ├── failed_runs.csv
     │   │   └── sweep_readme.md    compact provenance of how the sweep was built
-    │   ├── generation/            prompt, raw trace, parsed output
+    │   ├── generation/            prompt.txt, trace.jsonl, questions.json, cost.json (no copies of inputs)
     │   ├── questions/Q01 ... Q15/
     │   │   ├── question.txt       exact frozen text
-    │   │   ├── question.sha256
-    │   │   ├── answer_key.json    true answer + provenance (never shown to no-tool)
-    │   │   ├── verify.json        script check results
-    │   │   ├── no_tool/           prompt.txt, trace.jsonl, answer.txt, tool_check.json
-    │   │   ├── judge/             prompt.txt, trace.jsonl, judge.json
-    │   │   └── result.json
-    │   └── pass_summary.csv
+    │   │   ├── answer_key.json       true answer + provenance (never shown to no-tool)
+    │   │   ├── no_tool_trace.jsonl   (+ no_tool_trace_tryN.jsonl only if a contaminated try was discarded)
+    │   │   ├── judge_trace.jsonl
+    │   │   └── result.json         hash, verify results, tool check, answer text, verdict
+    │   ├──pass_summary.csv
+    │   └── pass_totals.csv
     ├── memory_A.md                only if Pass 1 does not validate; deleted at the end
     ├── diagnosis.md               only if Pass 2 runs
     ├── pass2/                     same layout as pass1, only if needed
@@ -193,7 +186,7 @@ that it is empty before launch; if not, stop and report.
 
 14. Memory A + Diagnosis → Pass 2
 
-15. Finish      deck_result.json, delete memory_A.md, W&B tables, stop
+15. Finish      deck_result.json, delete memory_A.md, summary tables, stop
 ```
 
 ---
@@ -207,10 +200,8 @@ that it is empty before launch; if not, stop and report.
    binary path, GEOS git commit (read-only `git -C GEOS_ROOT rev-parse HEAD`), Python
    version, conda env, Cursor CLI version, `AGENT_MODEL`, `NO_TOOL_MODEL`, the model
    your own session reports, `PROTOCOL_VERSION`, `RUN_TAG`.
-4. Create `D/_global/pricing.json` if missing (Section 17).
-5. Check W&B authentication. If it fails, switch to offline mode (Section 16) and
-   continue.
-6. Apply resume logic (Section 19) before doing any new work.
+4. Confirm `D/_global/pricing.json` exists (Section 17).
+5. Apply resume logic (Section 19) before doing any new work.
 
 ---
 
@@ -339,7 +330,16 @@ state this and the reason in `design.md` and rely on the template limit for vari
 
 Check before running:
 - inputs stay inside every table's or model's valid range, at every sweep point;
-- something actually happens at the locations and times the questions will ask about.
+- something actually happens at the locations and times the questions will ask about;
+- the template records only the numbers named in this design (a pressure, a
+  rate, a plume height, a cell count, a fracture length, a slip, or whatever
+  this deck's questions need), at the times the questions ask about. Do not
+  record the full reservoir field or restart files in sweep, pilot, or
+  refinement runs. If a number can only be computed from the full field,
+  compute it while building `sweep_table.csv` and then delete the field file.
+  Time-history HDF5 files are field files too. Once their numbers are in
+  `sweep_table.csv`, delete every `*.hdf5` in that run, including files kept for a
+  cited question or a refinement run.
 
 **Time-step resolution.** If any question will ask for a time (arrival, crossing, peak,
 onset), the simulation time step near that event must be at most half the timing
@@ -373,7 +373,11 @@ rerun pilots in new directories. Do not start the full sweep until pilots pass.
   export OMP_NUM_THREADS=1
   xargs -P "$PARALLEL_JOBS" -I{} bash -c 'run_one {}' < joblist.txt
   ```
-- Each run records `command.txt`, logs, `run.json` (exit code, wall time).
+- Each run writes ONE `run.json`: run ID, swept parameter values, exact command,
+  start/end time, wall time, exit code, input SHA256, output directory.
+  Do not write separate `command.txt` or `params.json` files.
+- Capture stdout/stderr while the run executes. If it succeeds, delete both logs.
+  If it fails, keep both logs and copy the first error line into `failed_runs.csv`.
 - Failed runs:
   - record them in `failed_runs.csv` with parameters and the first error line;
   - if failed runs ≤ `MAX_FAILED_RUN_PERCENT` of the sweep: continue without them;
@@ -402,10 +406,23 @@ Pass 2 may reuse the Pass 1 table in addition to its own new runs.
 
 Make ONE separate `AGENT_MODEL` call (its own `agent -p` invocation with
 `--output-format stream-json`, so its cost is isolated). Workspace: the current
-pass directory. Give it: `deck_summary.md`, `design.md`, `sweep_readme.md`,
-`sweep_table.csv`, `failed_runs.csv`, `source_manifest.json`, the full numeric values
-of any data file that holds numeric tables, and the rules below. In Pass 2 also give
-it `diagnosis.md`. It must not see `memory_A.md` directly.
+pass directory. Pass it the PATHS (do not copy the files into `generation/`) of: `deck_summary.md`,
+`design.md`, `sweep_readme.md`, `sweep_table.csv`, `failed_runs.csv`,
+`source_manifest.json`, and any data file that holds numeric tables. Include the
+rules below in the prompt. In Pass 2 also pass `diagnosis.md`. It must not see
+`memory_A.md` directly.
+
+The generation call must NEVER read `sweep_table.csv` (or any file larger than
+~50 KB) into its context. It inspects the table only with short Python commands in
+the `geos` environment that print at most ~50 lines each (column list, value
+ranges, filtered rows, brackets). Keep the call's total prompt tokens below the
+long-context threshold in `pricing.json`.
+
+The generation call may read ONLY the files whose paths it was given, plus
+`GEOS_SWEEP_BENCH.md` for the question rules. It must not search or read any other
+deck, any other `RUN_TAG`, `_global/`, or any file elsewhere in `GEOS_ROOT`.
+The prompt must contain the exact JSON fields listed below, so the call has no
+reason to look for an example or a schema.
 
 It returns, for each of the `QUESTIONS_PER_PASS` questions:
 - `question_text`;
@@ -498,7 +515,7 @@ within its tolerance, not just to grid resolution.
   claim a precision the time step does not have. If the time step is too coarse,
   rewrite the question.
 - Refinement runs follow every sweep rule: own directory under
-  `sweep/refine/<Qid>/`, same template and solver settings, logs and `run.json`,
+  `sweep/refine/<Qid>/`, same template and solver settings, same `run.json` and log rules as sweep runs,
   recorded in `failed_runs.csv` if they fail, counted in the pass budget.
 - If a refinement run fails, or the reserve would be exceeded, rewrite the question
   (different case or type) instead of freezing an unrefined answer.
@@ -508,12 +525,19 @@ the resulting true value.
 
 ### 10. Verify and freeze
 
-**Script checks.** Write `D/_global/scripts/verify.py` (reusable across decks) and run it
-on every question. It writes `verify.json` and checks mechanically:
+**Script checks.** Use (or write if missing) `D/_global/scripts/verify.py` (reusable across decks) and run it
+on every question. It records the results in the question's `result.json` (`verify` block) and checks mechanically:
+
+Before reusing a script from `D/_global/scripts/`, check that it writes only the
+files in the Section 3 layout. If it also writes old files (`answer.txt`,
+`verify.json`, `tool_check.json`, `prompt.txt`, `trace_try1.jsonl`, `judge.json`,
+`raw.json`, `stderr.log`), update the script so it stops writing them. Do not
+leave both layouts on disk.
 
 ```text
-[ ] true value recomputed from the provenance runs matches the answer key
-    (if not, the script value wins; if nothing reproduces, rewrite)
+[ ] true value recomputed from the scalar columns of sweep_table.csv matches the answer key
+    (the field file may already have been deleted; if not, the script value wins;
+    if nothing reproduces, rewrite)
 [ ] no provenance run is failed or adjacent to a failed run
 [ ] answer not at an edge of the swept range
 [ ] refinement: final bracket width / output interval <= half the tolerance
@@ -534,24 +558,19 @@ on every question. It writes `verify.json` and checks mechanically:
 
 **Agent review** (things a script cannot judge):
 
-```text
-[ ] all inputs stated (numeric tables included where they exist), units given
-[ ] models described in plain scientific words
-[ ] requested quantity, location, time, sign, tie rule precise
-[ ] no equations, methods, or simulation hints
-[ ] no candidate lists, no answer leakage
-[ ] something actually happens at the asked place/time
-[ ] not solvable by linearity, symmetry, superposition, steady-state, or a closed form
-[ ] reasoning questions: the naive argument really leads to the wrong conclusion
-[ ] the structural axis is used by at least one question, if the sweep has one
-```
+Check each question against every rule in "Question content rules" and the "Avoid"
+list in Section 9 that a script cannot test: all inputs and units stated, models in
+plain scientific words, requested quantity precise, no hints or leakage, something
+happens at the asked place and time, not solvable by a hand shortcut, and for
+reasoning questions the naive argument really gives the wrong conclusion. Also
+confirm at least one question uses the structural axis, if the sweep has one.
 
 If a question fails any check, **rewrite it now** (same slot) and check again. No model
 has seen it, so nothing is contaminated. A rewrite may be done by the controller or by
 a further generation call; log any extra call's cost to generation.
 
-When it passes: save `question.txt` (exact text), `question.sha256`,
-`answer_key.json`, mark `FROZEN`.
+When it passes: save `question.txt` (exact text) and `answer_key.json`, write the
+SHA256 of `question.txt` into `result.json`, mark `FROZEN`.
 
 Aim for exactly `QUESTIONS_PER_PASS` frozen questions. If the deck genuinely cannot
 support that many valid questions, freeze fewer and record the shortfall; never
@@ -578,7 +597,7 @@ agent -p --trust --mode ask \
 ```
 
 Launch each from inside its own empty folder and write its trace to the question's
-`no_tool/trace.jsonl`. If a call fails for a technical reason (network, rate limit),
+`no_tool_trace.jsonl`. If a call fails for a technical reason (network, rate limit),
 retry it; this does not count as a rerun.
 
 ### No-tool prompt (use verbatim; append only the question text)
@@ -595,15 +614,16 @@ itself states, no mention of a benchmark.
 ### Free tool-call check (script, no model call)
 
 After each session, a script counts every event with `"type":"tool_call"` in the trace
-and writes `tool_check.json` (`tool_calls_attempted`, `tool_calls_successful`).
+and records `tool_calls_attempted` and `tool_calls_successful` in `result.json`.
 
 - 0 → valid.
 - > 0 → contaminated (even if denied or failed). Discard the answer and rerun once
-  (up to `MAX_NO_TOOL_RERUNS`) in a new empty folder, keeping the contaminated trace.
+  (up to `MAX_NO_TOOL_RERUNS`) in a new empty folder, renaming the contaminated trace
+  to `no_tool_trace_tryN.jsonl` (N = the try number).
 - Still contaminated → status `NO_TOOL_EVAL_FAILED`. The question is excluded from the
   pass count (neither CORRECT nor INCORRECT). Record it.
 
-Save the final answer text to `no_tool/answer.txt`.
+Save the final answer text in `result.json` (`no_tool.answer_text`).
 
 ---
 
@@ -666,7 +686,7 @@ visible in every summary.
 
 Accepted = `INCORRECT`. Rejected = `CORRECT`.
 
-Write `judge/judge.json` and the question's `result.json` (Section 18).
+Save the judge's trace to `judge_trace.jsonl` and write its JSON into the question's `result.json` (Section 18).
 
 ---
 
@@ -739,21 +759,21 @@ new questions. Pass 2 may reuse Pass 1's sweep table.
    question IDs, final tolerance, total simulations (sweep and refinement separately),
    total wall time, cost totals by stage and by model.
 2. **Delete `memory_A.md`** if it exists. No memory carries over to another deck.
-3. Update W&B tables, finish W&B runs.
-4. Stop.
+3. Delete this run's empty folders under `D/_global/no_tool_workspaces/`, any
+   `__pycache__` folders, and any temporary or scratch files the controller created
+   (e.g. `*_tmp*`). Keep the question files, traces, `deck_result.json`, `sweep_table.csv`, `sweep_readme.md`, `failed_runs.csv`, `design.md`, `deck_summary.md`, `source/`, and the generation files.
+4. After those files exist, delete the per-run copies. For the baseline and every pilot, sweep, and refinement run, delete `input.xml`, `run.json`, `stdout.log`, `stderr.log`, and the `output/` folder, including every `*.hdf5`. For a refinement run, keep `observables.json`. The swept numbers are already in `sweep_table.csv`, the failed-run errors are already in `failed_runs.csv`, the baseline findings are already in `deck_summary.md`, and each refinement measurement is already in that question's `answer_key.json`.
+5. Update pass_summary.csv and pass_totals.csv.
+6. Stop.
 
 ---
 
-## 16. W&B logging
+## 16. Local summary tables
 
-Project `WANDB_PROJECT`, group = `<deck_slug>__<RUN_TAG>`. Log only summary
-information. **Never upload sweep outputs or per-run simulation values.**
+Write two CSV files per pass; never upload anything. Update both after each stage
+that changes them.
 
-- One W&B run per question (name `<deck_slug>__<RUN_TAG>__p<pass>__<question_id>`) with
-  a small artifact: `question.txt`, `answer_key.json`, `no_tool/answer.txt`,
-  `judge.json`, `result.json`.
-
-**Table 1 — one row per question**
+**pass_summary.csv — one row per question**
 ```text
 deck_slug, run_tag, pass, category_name, question_id, question_type, template_id,
 answer_type, verdict, accepted, correct_value_wrong_reasoning,
@@ -763,7 +783,7 @@ no_tool_estimated_api_cost_usd, judge_estimated_api_cost_usd,
 no_tool_wall_time_s, judge_wall_time_s
 ```
 
-**Table 2 — one row per pass, plus a deck-total row**
+**pass_totals.csv — one row per pass, plus a deck-total row**
 ```text
 deck_slug, run_tag, pass, questions_generated, questions_valid, questions_accepted,
 questions_correct_value_wrong_reasoning, deck_status,
@@ -773,14 +793,6 @@ judge_estimated_api_cost_usd, diagnosis_estimated_api_cost_usd,
 grok_estimated_api_cost_usd, sol_estimated_api_cost_usd,
 total_estimated_api_cost_usd, total_wall_time_s
 ```
-
-Update both tables after each stage that changes them.
-
-**W&B failure never stops the experiment.** If login or upload fails, set
-`WANDB_MODE=offline`, keep logging locally, record the failure, and continue. Offline
-runs can be uploaded later with `wandb sync`. Never print or store API keys.
-
----
 
 ## 17. Cost accounting
 
@@ -792,30 +804,18 @@ usage data: `inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`
 duration, and the reported model. Price each call with the rates of the model that
 made it.
 
-`D/_global/pricing.json` (USD per 1M tokens; experiment configuration — do not
-silently change):
-
-```json
-{
-  "gpt-5.6-sol": {
-    "input": 5.00, "output": 30.00, "cache_read": 0.50, "cache_write": 6.25
-  },
-  "cursor-grok-4.6-high": {
-    "input": 2.00, "output": 6.00, "cache_read": 0.50, "cache_write": 2.00,
-    "long_context_threshold_prompt_tokens": 200000,
-    "long_context": { "input": 4.00, "output": 12.00, "cache_read": 1.00, "cache_write": 4.00 },
-    "note": "cache_write not published; assumed equal to input rate. Above the threshold, all tokens of that call use long_context rates."
-  }
-}
-```
+Rates (USD per 1M tokens) are in `D/_global/pricing.json`. It is experiment
+configuration: do not change it. If it is missing, stop and report.
 
 ```text
 cost = inputTokens/1e6 * input + outputTokens/1e6 * output
      + cacheReadTokens/1e6 * cache_read + cacheWriteTokens/1e6 * cache_write
 ```
 
-For Grok, if a call's prompt tokens (input + cache read + cache write) reach the
-threshold, use the `long_context` rates for every token of that call.
+For Grok, compare the call with that model's `long_context_threshold_prompt_tokens`
+in `pricing.json`. For `grok-4.7-high` the threshold is on input tokens only. If
+the input exceeds it, use the `long_context` rates for every token of that call.
+For `cursor-grok-4.6-high`, the threshold is on input + cache read + cache write.
 
 If a model has no pricing row, record cost as `null` and continue.
 
@@ -829,7 +829,7 @@ If a model has no pricing row, record cost as `null` and continue.
 | diagnosis | AGENT_MODEL | deck (only if Pass 2 runs) |
 
 The controller cannot read its own session's final usage while running. Log
-controller cost as `null` in W&B and write `D/_global/scripts/controller_cost.py`,
+controller cost as `null` in deck_result.json and Use (or write if missing) `D/_global/scripts/controller_cost.py`,
 which parses the launch log in `D/_global/controller_logs/` after the run and prints the
 controller cost.
 
@@ -844,7 +844,7 @@ GEOS compute is not API cost; track it as run counts and wall time only.
   "question_id": "Q07",
   "deck_slug": "",
   "deck_sha256": "",
-  "protocol_version": 2,
+  "protocol_version": 3,
   "run_tag": "",
   "pass": 1,
   "category_name": "",
@@ -863,11 +863,13 @@ GEOS compute is not API cost; track it as run counts and wall time only.
                     "selection_rule": "" },
     "naive_conclusion": null
   },
-  "verify": { "all_script_checks_passed": true, "rewrites": 0 },
+   "verify": { "all_script_checks_passed": true, "failed_checks": [], "rewrites": 0 },
   "no_tool": {
     "valid": true, "reruns": 0, "tool_calls_attempted": 0,
     "no_tool_estimate": null, "usage": {}, "estimated_api_cost_usd": null,
+    "answer_text": "",
     "wall_time_seconds": null
+    
   },
   "judge": {
     "verdict": "INCORRECT", "reasoning_sound": null,
@@ -889,6 +891,9 @@ The workflow must be resumable. Before any work, scan
 `decks/<deck_slug>/<RUN_TAG>/` and continue at the earliest unfinished step. Never
 repeat finished work:
 
+- `deck_result.json` exists → the deck is finished; do nothing and stop. Missing
+  `output/` folders of pruned runs are expected and must never be rerun.
+- Per-run `input.xml`, `run.json`, logs, and `output/` deleted at finish are expected. Never rerun those simulations.
 - successful baseline exists → do not rerun;
 - `sweep_table.csv` exists and `sweep_readme.md` confirms completion → do not rerun the
   sweep; rerun only runs missing a result;
@@ -896,7 +901,6 @@ repeat finished work:
 - question frozen → never regenerate or edit it;
 - no-tool answer valid → do not rerun;
 - judge done → do not rejudge;
-- only W&B upload missing → upload only.
 
 If an existing record under this `RUN_TAG` has a different `protocol_version`, stop
 and report; the user must choose a new `RUN_TAG`.
@@ -911,29 +915,6 @@ continue. Never weaken a rule, change a frozen question, or fabricate a result t
 past an error. Stop only if it cannot be fixed within the rules.
 
 ---
-
-## 20. Completion checklist
-
-```text
-[ ] deck + all included decks and data files read and copied; deck_keywords.json built
-[ ] baseline ran successfully once (fixes recorded if any)
-[ ] every baseline output inventoried; deck_summary.md written
-[ ] per pass: design.md with structural axis (or reason for none), pilot passed,
-    sweep within budget and failure limit, sweep_table.csv + sweep_readme.md written
-[ ] per pass: questions generated, refined where needed, verify.py passed, frozen
-[ ] template limit respected
-[ ] every no-tool run fresh, isolated in its own empty folder, tool-call-checked
-[ ] every valid answer judged; error fields and flags computed by script
-[ ] decision recorded; memory_A.md + diagnosis.md written only if Pass 2 ran
-[ ] deck_result.json written
-[ ] memory_A.md deleted
-[ ] W&B tables updated (online or offline)
-```
-
-Then stop.
-
----
-
 ## Appendix — How the user launches this
 
 Once, before the first launch (skip if the folder already exists):
@@ -948,7 +929,7 @@ set `INPUT_XML` and `RUN_TAG` in Section 1, then:
 ```bash
 cd /home/kbhau001/codes/GEOS
 conda activate geos
-agent -p --force --trust --model cursor-grok-4.6-high \
+agent -p --force --trust --model grok-4.7-high \
   --workspace /home/kbhau001/codes/GEOS \
   --output-format stream-json \
   "Read /home/kbhau001/codes/GEOS/geos_sweep_bench/GEOS_SWEEP_BENCH.md completely and execute the workflow exactly as specified. Treat it as the authoritative experiment protocol. Continue autonomously through the full experiment unless the protocol itself requires stopping. Do not merely summarize or explain the file; execute it." \

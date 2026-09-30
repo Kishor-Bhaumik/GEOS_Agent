@@ -1,0 +1,73 @@
+
+No-tool results: 281 of 300 questions judged incorrect
+
+Deck / run                                               Judged incorrect
+-------------------------------------------------------  ----------------
+10x10x10Hex_LaplaceFEM_smoke (v3_run1)                   14 / 15
+4comp_2ph_cap_1d (v2_run1)                               15 / 15
+ALM_slippingFault_horizontal_smoke (v3_run1)             14 / 15
+ALM_slippingFault_vertical_smoke (v3_run1)               15 / 15
+ALM_UnstructuredCrack_smoke (v3_run1)                    12 / 15
+co2_flux_3d (v2_loop2)                                   13 / 15
+co2_hybrid_1d                                            15 / 15
+ContactMechanics_PassingCrack_smoke (v3_run1)            15 / 15
+ContactMechanics_PEBICrack_smoke (v3_run1)               15 / 15
+deadoil_2ph_staircase_gravity_segregation_3d (v2_loop2)  14 / 15
+deadoil_2ph_staircase_gravity_segregation_3d (v2_run1)   13 / 15
+deadoil_3ph_staircase_3d (v2_run1)                       15 / 15
+deadoil_3ph_staircase_hybrid_3d (v2_run1)                15 / 15
+deadoil_3ph_staircase_obl_3d (v2_run1)                   15 / 15
+elas3D_Q5_abc_fs_smoke (v3_run1)                         15 / 15
+EmbFrac_Compression_CoulombFriction_smoke (v3_run1)      14 / 15
+isothermalLeakyWell_smoke_3d (v3_run1)                   12 / 15
+simpleCo2InjTutorial_smoke (v3_run1)                     14 / 15
+staircase_co2_wells_3d (v3_run1)                         15 / 15
+ThermoPoroElastic_conforming_smoke (v3_run1)             11 / 15
+-------------------------------------------------------  ----------------
+Total                                                    281 / 300
+
+281 / 300
+judged incorrect by the protocol judge
+15 questions on 19 unique decks (20 runs)
+
+"Judged incorrect" = wrong value OR materially unsound reasoning, not 281 wrong numbers.
+
+
+
+
+
+
+Compute and model cost per deck run
+
+Deck / run                                               GEOS runs    Sweep wall     Agent   No-tool  Total logged
+------------------------------------------------------------------------------------------------------------------
+10x10x10Hex_LaplaceFEM_smoke (v3_run1)                         171        <1 min     $2.70     $2.63         $5.32
+4comp_2ph_cap_1d (v2_run1)                                     833        11 min     $2.65     $2.89         $5.54
+ALM_slippingFault_horizontal_smoke (v3_run1)                   182         1 min     $1.45     $2.34         $3.79
+ALM_slippingFault_vertical_smoke (v3_run1)                     424         2 min     $1.68     $2.58         $4.26
+ALM_UnstructuredCrack_smoke (v3_run1)                          697   289 min CPU     $6.33     $2.11         $8.44
+co2_flux_3d (v2_loop2)                                         763        19 min     $2.88     $2.35         $5.22
+co2_hybrid_1d                                                  978         3 min     $4.68     $2.68         $7.36
+ContactMechanics_PassingCrack_smoke (v3_run1)                  906         3 min     $4.20     $2.58         $6.78
+ContactMechanics_PEBICrack_smoke (v3_run1)                     252    15 min CPU     $2.79     $2.14         $4.93
+deadoil_2ph_staircase_gravity_segregation_3d (v2_loop2)        322        10 min     $5.44     $2.84         $8.28
+deadoil_2ph_staircase_gravity_segregation_3d (v2_run1)         314         3 min     $6.13     $3.20         $9.33
+deadoil_3ph_staircase_3d (v2_run1)                             311         2 min     $0.97     $2.31         $3.28
+deadoil_3ph_staircase_hybrid_3d (v2_run1)                      138         2 min     $3.06     $2.98         $6.04
+deadoil_3ph_staircase_obl_3d (v2_run1)                         148         1 min     $3.24     $1.84         $5.08
+elas3D_Q5_abc_fs_smoke (v3_run1)                               286         1 min       n/a     $2.32        $2.32*
+EmbFrac_Compression_CoulombFriction_smoke (v3_run1)            669         2 min    $0.60*     $2.19        $2.79*
+isothermalLeakyWell_smoke_3d (v3_run1)                         287       124 min       n/a     $2.73        $2.73*
+simpleCo2InjTutorial_smoke (v3_run1)                           389        82 min     $6.02     $2.89         $8.90
+staircase_co2_wells_3d (v3_run1)                               120         4 min       n/a     $2.78        $2.78*
+ThermoPoroElastic_conforming_smoke (v3_run1)                   483    57 min CPU     $6.20     $3.57         $9.77
+------------------------------------------------------------------------------------------------------------------
+Total                                                         8673                                    $102.34
+
+GEOS runs = baseline + pilots + sweep + refinement, failed launches included.
+Sweep wall = parallel clock time of the sweep. A value marked CPU is the sum of per-run
+wall times; that run did not record the parallel clock.
+Agent = generation + judge + any diagnosis cost. No-tool = the no-tool model.
+Total logged = agent + no-tool. Controller cost is not included; it was not logged.
+A * means generation or judge was not priced, so that total is only the known part.
+The total row adds only complete totals.

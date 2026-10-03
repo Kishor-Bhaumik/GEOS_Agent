@@ -1,0 +1,36 @@
+{
+  "gpt-5.6-sol": {
+    "input": 5.00,
+    "output": 30.00,
+    "cache_read": 0.50,
+    "cache_write": 6.25
+  },
+  "cursor-grok-4.6-high": {
+    "input": 2.00,
+    "output": 6.00,
+    "cache_read": 0.50,
+    "cache_write": 2.00,
+    "long_context_threshold_prompt_tokens": 200000,
+    "long_context": {
+      "input": 4.00,
+      "output": 12.00,
+      "cache_read": 1.00,
+      "cache_write": 4.00
+    },
+    "note": "cache_write not published; assumed equal to input rate. Above the threshold, all tokens of that call use long_context rates."
+  },
+  "grok-4.7-high": {
+    "input": 2.00,
+    "output": 6.00,
+    "cache_read": 0.50,
+    "cache_write": 2.00,
+    "long_context_threshold_prompt_tokens": 256000,
+    "long_context": {
+      "input": 4.00,
+      "output": 12.00,
+      "cache_read": 1.00,
+      "cache_write": 4.00
+    },
+    "note": "Cursor standard tier, not Fast. Cache write is not published; assumed equal to the input rate. The threshold is on input tokens only. Above it, every token of that call uses long_context rates."
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "parsers": [
+    {
+      "name": "vtk_unstructured",
+      "module": "vtk_unstructured.py",
+      "formats": [".vtu", ".pvd", ".vtm"],
+      "purpose": "Read GEOS VTK UnstructuredGrid cell/point data and PVD timestep collections.",
+      "entrypoints": ["read_vtu", "read_pvd"]
+    },
+    {
+      "name": "geos_stdout_tables",
+      "module": "geos_stdout_tables.py",
+      "formats": [".log", ".txt"],
+      "purpose": "Parse GEOS TableTextFormatter ASCII tables and CFL lines from solver stdout.",
+      "entrypoints": ["parse_stdout_tables", "region_series"]
+    },
+    {
+      "name": "hdf5_time_history",
+      "module": "hdf5_time_history.py",
+      "formats": [".hdf5", ".h5"],
+      "purpose": "Read GEOS TimeHistory / PackCollection HDF5. Pair each field with '<field> Time' (n,1) raveled. phaseVolumeFraction is (time, cell, phase).",
+      "entrypoints": ["read_time_history", "list_datasets", "field_at_time", "first_crossing"]
+    },
+    {
+      "name": "sidre_restart",
+      "module": "sidre_restart.py",
+      "formats": [".hdf5", ".h5"],
+      "purpose": "Inspect GEOS Sidre/Conduit Restart HDF5. Numeric payloads live in datasets named __values__ under a field group.",
+      "entrypoints": ["list_numeric_fields", "field_array"]
+    },
+    {
+      "name": "seismo_trace_vector",
+      "module": "seismo_trace_vector.py",
+      "formats": [".txt"],
+      "purpose": "Read a 3-component receiver trace stored as three concatenated index-time-value blocks (x, then y, then z).",
+      "entrypoints": ["read_seismo_vector"]
+    }
+  ]
+}

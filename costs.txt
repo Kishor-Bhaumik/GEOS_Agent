@@ -61,6 +61,73 @@ v6 counts use the final pass of each deck.
 
 
 
+Table 2. Compute and model cost per deck run (estimated API list price)
+
+Deck / run                                          Protocol  GEOS runs  Sweep wall   Agent  No-tool  Controller    Total
+---------------------------------------------------------------------------------------------------------------------------
+10x10x10Hex_LaplaceFEM_smoke (v3_run1)              v2/v3          171     <1 min    $2.70    $2.63         n/a    $5.32
+4comp_2ph_cap_1d (v2_run1)                          v2/v3          833     11 min    $2.65    $2.89         n/a    $5.54
+ALM_slippingFault_horizontal_smoke (v3_run1)        v2/v3          182      1 min    $1.45    $2.34         n/a    $3.79
+ALM_slippingFault_vertical_smoke (v3_run1)          v2/v3          424      2 min    $1.68    $2.58         n/a    $4.26
+ALM_UnstructuredCrack_smoke (v3_run1)               v2/v3          697   289 min C   $6.33    $2.11         n/a    $8.44
+co2_flux_3d (v2_loop2)                              v2/v3          763     19 min    $2.88    $2.35         n/a    $5.22
+co2_hybrid_1d                                       v2/v3          978      3 min    $4.68    $2.68         n/a    $7.36
+ContactMechanics_PassingCrack_smoke (v3_run1)       v2/v3          906      3 min    $4.20    $2.58         n/a    $6.78
+ContactMechanics_PEBICrack_smoke (v3_run1)          v2/v3          252    15 min C   $2.79    $2.14         n/a    $4.93
+deadoil_2ph_..._segregation_3d (v2_loop2)           v2/v3          322     10 min    $5.44    $2.84         n/a    $8.28
+deadoil_2ph_..._segregation_3d (v2_run1)            v2/v3          314      3 min    $6.13    $3.20         n/a    $9.33
+deadoil_3ph_staircase_3d (v2_run1)                  v2/v3          311      2 min    $0.97    $2.31         n/a    $3.28
+deadoil_3ph_staircase_hybrid_3d (v2_run1)           v2/v3          138      2 min    $3.06    $2.98         n/a    $6.04
+deadoil_3ph_staircase_obl_3d (v2_run1)              v2/v3          148      1 min    $3.24    $1.84         n/a    $5.08
+elas3D_Q5_abc_fs_smoke (v3_run1)                    v2/v3          286      1 min      n/a    $2.32         n/a    $2.32 ‡
+EmbFrac_Compression_CoulombFriction_smoke (v3_run1) v2/v3          669      2 min   $0.60 ‡   $2.19         n/a    $2.79 ‡
+isothermalLeakyWell_smoke_3d (v3_run1)              v2/v3          287    124 min      n/a    $2.73         n/a    $2.73 ‡
+simpleCo2InjTutorial_smoke (v3_run1)                v2/v3          389     82 min    $6.02    $2.89         n/a    $8.90
+staircase_co2_wells_3d (v3_run1)                    v2/v3          120      4 min      n/a    $2.78         n/a    $2.78 ‡
+ThermoPoroElastic_conforming_smoke (v3_run1)        v2/v3          483    57 min C   $6.20    $3.57         n/a    $9.77
+---------------------------------------------------------------------------------------------------------------------------
+Subtotal v2/v3 (complete totals only)                             8673                                          $102.34
+
+acous3D_Q3_abc_smoke (v6_loop2)                     v6             230      3 min C   $4.67    $2.92       $9.34   $16.93
+beamBending_smoke (v6_run1)                         v6             142     45 min C   $3.96    $2.12      $14.04   $20.11
+co2_thermal_2d (v6_loop2)                           v6             251     73 min C   $4.15    $2.58       $4.74   $11.47
+DeviatedElasticWellbore_smoke (v6_run1)             v6             138      1 min C   $3.39    $2.50       $9.95   $15.84
+DeviatedPoroElasticWellbore_Drilling_smoke (v6_l1)  v6             297     37 min C   $4.35    $3.18       $1.42 † $8.96
+DryFrac_StaticPenny_PrismElem (v6_loop2)            v6             146        n/a     $2.54    $2.36       $3.01    $7.91
+FlowProppantTransport2d_smoke (v6_loop1)            v6             241        n/a    $12.58 §  $2.32       $3.82   $18.72
+fractureMatrixFlow_pedfm_..._smoke (v6_loop1)       v6             614     12 min C  $12.23 §  $2.09      $14.62   $28.94
+fractureMatrixThermalFlow_edfm_smoke (v6_loop2)     v6             404     25 min C   $4.90    $2.96      $14.78   $22.64
+grav_seg_c1ppu_hyst (v6_loop1)                      v6             191     49 min C   $6.88    $2.85      $11.35   $21.08
+gravityInducedStress_initialization_smoke (v6_l2)   v6             216     13 min C   $2.93    $2.46      $12.35   $17.74
+mpm_dfgMovingGrid (v6_loop1)                        v6               1        n/a     $0.00    $0.00       $2.39    $2.39
+mpm_singleParticle (v6_loop2)                       v6             282      4 min C   $4.09    $2.36       $4.82   $11.27
+PhaseFieldFracture_CohesiveModel (v6_loop1)         v6             279     84 min C   $8.72    $2.34      $21.44   $32.50
+PoroElastic_conformingFracture_..._smoke (v6_l1)    v6             324     36 min C   $3.93    $2.48      $15.45   $21.86
+PoroViscoDruckerPrager_smoke (v6_loop1)             v6             659        n/a     $4.58 §  $2.88       $6.09   $13.56
+PressurePerm_1d_smoke (v6_loop2)                    v6             517     23 min C   $7.98    $2.69      $13.84   $24.52
+sourceFlux_2d (v6_loop1)                            v6             427     70 min C   $4.20    $2.72       $7.38   $14.29
+SpringSliderExplicit_A_smoke (v6_loop2)             v6             254      6 min C   $2.29    $1.93      $13.15   $17.36
+ThermoPoroElastic_consolidation_smoke_fim (v6_l1)   v6             557     75 min C  $11.65    $6.78      $11.39   $29.82
+---------------------------------------------------------------------------------------------------------------------------
+Subtotal v6                                                       6170                $110.01   $52.51     $195.38  $357.90
+
+===========================================================================================================================
+Total, agent + no-tool only (comparable across protocols)        14843                                          $264.85
+Total including the v6 controller                                                                               $460.23
+
+GEOS runs = baseline + pilots + sweep + refinement, failed launches included.
+Sweep wall = parallel clock time of the sweep. "C" = sum of per-run wall times (the parallel
+clock was not recorded; v6 never records it). n/a = not recorded.
+Agent = generation + judge + diagnosis. No-tool = the no-tool model. Controller = the
+controller session (logged only in v6). Total = agent + no-tool (+ controller in v6).
+v6 prices are at base rates: multi-step sessions are priced as normal-sized requests, not
+at the 2× long-context rate the logs had applied. v2/v3 prices are as logged.
+‡ v2/v3: generation or judge not priced; only the known part is shown and it is left out of the subtotal.
+† v6: the controller log looks incomplete (109-min session, 22.8K input tokens), so this is a lower bound.
+§ v6: per-call token counts were not saved; priced as logged, so this may still be up to 2× high.
+Not included: the v6 rejudge of 267 questions with the new judge, about $21.
+
+
 
 
 

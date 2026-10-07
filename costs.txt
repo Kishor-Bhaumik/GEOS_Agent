@@ -1,4 +1,78 @@
 
+Table 1. No-tool results: 553 of 582 questions judged incorrect (95.0%)
+
+Deck / run                                                  Protocol   Judged incorrect
+----------------------------------------------------------  --------   ----------------
+10x10x10Hex_LaplaceFEM_smoke (v3_run1)                      v2/v3      14 / 15
+4comp_2ph_cap_1d (v2_run1)                                  v2/v3      15 / 15
+ALM_slippingFault_horizontal_smoke (v3_run1)                v2/v3      14 / 15
+ALM_slippingFault_vertical_smoke (v3_run1)                  v2/v3      15 / 15
+ALM_UnstructuredCrack_smoke (v3_run1)                       v2/v3      12 / 15
+co2_flux_3d (v2_loop2)                                      v2/v3      13 / 15
+co2_hybrid_1d                                               v2/v3      15 / 15
+ContactMechanics_PassingCrack_smoke (v3_run1)               v2/v3      15 / 15
+ContactMechanics_PEBICrack_smoke (v3_run1)                  v2/v3      15 / 15
+deadoil_2ph_staircase_gravity_segregation_3d (v2_loop2)     v2/v3      14 / 15
+deadoil_2ph_staircase_gravity_segregation_3d (v2_run1)      v2/v3      13 / 15
+deadoil_3ph_staircase_3d (v2_run1)                          v2/v3      15 / 15
+deadoil_3ph_staircase_hybrid_3d (v2_run1)                   v2/v3      15 / 15
+deadoil_3ph_staircase_obl_3d (v2_run1)                      v2/v3      15 / 15
+elas3D_Q5_abc_fs_smoke (v3_run1)                            v2/v3      15 / 15
+EmbFrac_Compression_CoulombFriction_smoke (v3_run1)         v2/v3      14 / 15
+isothermalLeakyWell_smoke_3d (v3_run1)                      v2/v3      12 / 15
+simpleCo2InjTutorial_smoke (v3_run1)                        v2/v3      14 / 15
+staircase_co2_wells_3d (v3_run1)                            v2/v3      15 / 15
+ThermoPoroElastic_conforming_smoke (v3_run1)                v2/v3      11 / 15
+----------------------------------------------------------  --------   ----------------
+Subtotal v2/v3 (20 runs, 19 decks)                                     281 / 300  (93.7%)
+
+acous3D_Q3_abc_smoke (v6_loop2)                             v6         15 / 15
+beamBending_smoke (v6_run1)                                 v6         12 / 15
+co2_thermal_2d (v6_loop2)                                   v6         13 / 15
+DeviatedElasticWellbore_smoke (v6_run1)                     v6         15 / 15
+DeviatedPoroElasticWellbore_Drilling_smoke (v6_loop1)       v6         14 / 15
+DryFrac_StaticPenny_PrismElem (v6_loop2)                    v6         14 / 15
+FlowProppantTransport2d_smoke (v6_loop1)                    v6         14 / 14
+fractureMatrixFlow_pedfm_..._smoke (v6_loop1)               v6         14 / 14  †
+fractureMatrixThermalFlow_edfm_smoke (v6_loop2)             v6         15 / 15
+grav_seg_c1ppu_hyst (v6_loop1)                              v6         15 / 15
+gravityInducedStress_initialization_smoke (v6_loop2)        v6         15 / 15
+mpm_dfgMovingGrid (v6_loop1)                                v6         — (DECK_UNSUITABLE)
+mpm_singleParticle (v6_loop2)                               v6         15 / 15
+PhaseFieldFracture_CohesiveModel (v6_loop1)                 v6         14 / 14
+PoroElastic_conformingFracture_..._smoke (v6_loop1)         v6         14 / 15
+PoroViscoDruckerPrager_smoke (v6_loop1)                     v6         15 / 15
+PressurePerm_1d_smoke (v6_loop2)                            v6         15 / 15
+sourceFlux_2d (v6_loop1)                                    v6         13 / 15
+SpringSliderExplicit_A_smoke (v6_loop2)                     v6         15 / 15
+ThermoPoroElastic_consolidation_smoke_fim (v6_loop1)        v6         15 / 15  (pass 1: 9 / 15)
+----------------------------------------------------------  --------   ----------------
+Subtotal v6 (21 runs, 20 decks with questions)                         272 / 282  (96.5%)
+
+==========================================================================================
+Total (41 runs, 39 decks with questions)                               553 / 582  (95.0%)
+
+"Judged incorrect":
+  v2/v3 = wrong value OR materially unsound reasoning (judge decides).
+  v6    = value outside the 1% tolerance only (script decides; reasoning never changes it).
+† Ran before the staircase check; 10 of its answers are mesh cell edges. Treat as flawed.
+v6 counts use the final pass of each deck.
+
+
+
+
+
+
+
+===========
+============
+============
+===========
+============
+============
+===========
+============
+============
 No-tool results: 281 of 300 questions judged incorrect
 
 Deck / run                                               Judged incorrect
